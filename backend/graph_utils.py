@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -8,10 +8,23 @@ from scipy.stats import expon, norm, poisson
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 
 BASE_DIR = Path(__file__).resolve().parent
 DATASET_PATH = BASE_DIR / "final_cleaned_dataset.csv"
 FRONTEND_PUBLIC_DIR = BASE_DIR.parent / "frontend" / "carbon-frontend" / "public"
+TRANSPORT_LABEL_MAP = {
+    0: "Bike",
+    1: "Bus",
+    2: "Car",
+    3: "EV",
+    4: "Walk",
+    5: "Private",
+    6: "Public",
+    7: "Walk/Bicycle",
+}
 
 
 def load_dataset():
@@ -45,6 +58,30 @@ def generate_visualization_graphs(df):
     sns.heatmap(df.corr(numeric_only=True), annot=True, cmap="coolwarm")
     plt.title("Correlation Heatmap")
     save_plot("heatmap.png")
+
+    if "transport" in df.columns:
+        transport_series = (
+            df["transport"]
+            .dropna()
+            .astype(int)
+            .map(lambda value: TRANSPORT_LABEL_MAP.get(value, f"Type {value}"))
+        )
+        transport_counts = transport_series.value_counts()
+
+        if not transport_counts.empty:
+            plt.figure(figsize=(8, 6))
+            colors = sns.color_palette("Set2", len(transport_counts))
+            plt.pie(
+                transport_counts.values,
+                labels=transport_counts.index,
+                autopct="%1.1f%%",
+                startangle=140,
+                colors=colors,
+                wedgeprops={"edgecolor": "white", "linewidth": 1},
+            )
+            plt.title("Transport Medium Distribution")
+            plt.axis("equal")
+            save_plot("transport_pie.png")
 
 
 def generate_correlation_graphs(df):
@@ -102,6 +139,51 @@ def generate_mlr_graphs(df):
     save_plot("mlr_sample.png")
 
     return {"r2_score": round(r2_score(y, y_pred), 4)}
+
+
+def get_mlr_details(df):
+    feature_columns = ["travel_km", "electricity", "food_encoded", "screen_time", "waste"]
+    x = df[feature_columns]
+    y = df["emission"]
+
+    model = LinearRegression()
+    model.fit(x, y)
+    y_pred = model.predict(x)
+
+    coefficients = []
+    equation_parts = []
+    display_labels = {
+        "travel_km": "Travel",
+        "electricity": "Electricity",
+        "food_encoded": "Food",
+        "screen_time": "Screen Time",
+        "waste": "Waste",
+    }
+
+    for column, coefficient in zip(feature_columns, model.coef_):
+        coefficient_value = round(float(coefficient), 4)
+        coefficients.append(
+            {
+                "feature": column,
+                "label": display_labels.get(column, column),
+                "coefficient": coefficient_value,
+            }
+        )
+        equation_parts.append(f"{coefficient_value} * {display_labels.get(column, column)}")
+
+    intercept = round(float(model.intercept_), 4)
+    equation = f"Emission = {intercept}"
+    if equation_parts:
+        equation = f"{equation} + " + " + ".join(equation_parts)
+
+    return {
+        "target": "emission",
+        "intercept": intercept,
+        "coefficients": coefficients,
+        "equation": equation,
+        "r2_score": round(r2_score(y, y_pred), 4),
+        "dataset_rows": int(len(df)),
+    }
 
 
 def generate_mle_graphs(df):

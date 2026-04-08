@@ -1,40 +1,50 @@
+﻿from pathlib import Path
+
+import matplotlib
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load dataset
-df = pd.read_csv("final_cleaned_dataset.csv")
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
-# -------------------------------
-# 1. Histogram (Emission Distribution)
-# -------------------------------
-plt.figure()
-sns.histplot(df["emission"], bins=30, kde=True)
-plt.title("Emission Distribution")
-plt.savefig("histogram.png")
 
-# -------------------------------
-# 2. Scatter Plot (Travel vs Emission)
-# -------------------------------
-plt.figure()
-sns.scatterplot(x=df["travel_km"], y=df["emission"])
-plt.title("Travel vs Emission")
-plt.savefig("scatter.png")
+BASE_DIR = Path(__file__).resolve().parent
+DATASET_PATH = BASE_DIR / "final_cleaned_dataset.csv"
+OUTPUT_DIR = BASE_DIR
 
-# -------------------------------
-# 3. Electricity vs Emission
-# -------------------------------
-plt.figure()
-sns.scatterplot(x=df["electricity"], y=df["emission"])
-plt.title("Electricity vs Emission")
-plt.savefig("electricity.png")
 
-# -------------------------------
-# 4. Correlation Heatmap
-# -------------------------------
-plt.figure()
-sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
-plt.title("Correlation Heatmap")
-plt.savefig("heatmap.png")
+def save_plot(filename):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    plt.tight_layout()
+    plt.savefig(OUTPUT_DIR / filename)
+    plt.close()
 
-print("✅ Graphs generated successfully!")
+
+def generate_visualizations():
+    df = pd.read_csv(DATASET_PATH)
+
+    plt.figure()
+    sns.histplot(df["emission"], bins=30, kde=True)
+    plt.title("Emission Distribution")
+    save_plot("histogram.png")
+
+    plt.figure()
+    sns.scatterplot(x=df["travel_km"], y=df["emission"])
+    plt.title("Travel vs Emission")
+    save_plot("scatter.png")
+
+    plt.figure()
+    sns.scatterplot(x=df["electricity"], y=df["emission"])
+    plt.title("Electricity vs Emission")
+    save_plot("electricity.png")
+
+    plt.figure()
+    sns.heatmap(df.corr(numeric_only=True), annot=True, cmap="coolwarm")
+    plt.title("Correlation Heatmap")
+    save_plot("heatmap.png")
+
+    print("Graphs generated successfully.")
+
+
+if __name__ == "__main__":
+    generate_visualizations()

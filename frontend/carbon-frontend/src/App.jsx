@@ -6,6 +6,9 @@ import Correlation from "./pages/Correlation";
 import MLR from "./pages/MLR";
 import Predict from "./pages/Predict";
 import MLE from "./pages/MLE";
+import Sampling from "./pages/Sampling";
+import TTest from "./pages/TTest";
+import ZTest from "./pages/ZTest";
 
 function App() {
   return (
@@ -17,6 +20,9 @@ function App() {
         <Route path="/mlr" element={<MLR />} />
         <Route path="/predict" element={<Predict />} />
         <Route path="/mle" element={<MLE />} />
+        <Route path="/sampling" element={<Sampling />} />
+        <Route path="/t-test" element={<TTest />} />
+        <Route path="/z-test" element={<ZTest />} />
       </Routes>
     </BrowserRouter>
   );

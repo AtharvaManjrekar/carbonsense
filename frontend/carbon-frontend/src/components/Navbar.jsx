@@ -11,6 +11,9 @@ function Navbar() {
         <Link to="/correlation">Correlation</Link>
         <Link to="/mlr">MLR</Link>
         <Link to="/mle">MLE</Link>
+        <Link to="/sampling">Sampling</Link>
+        <Link to="/t-test">T-Test</Link>
+        <Link to="/z-test">Z-Test</Link>
         <Link to="/predict">Predict</Link>
       </div>
     </div>

@@ -416,6 +416,7 @@ function Visualization() {
           <ChartBox title="Emission Distribution" img="/histogram.png" />
           <ChartBox title="Travel vs Emission" img="/scatter.png" />
           <ChartBox title="Correlation Heatmap" img="/heatmap.png" />
+          <ChartBox title="Transport Medium Distribution" img="/transport_pie.png" />
         </div>
       </div>
     </div>
